@@ -3,6 +3,8 @@ name = "chatgpt-bot"
 version = "0.1.0"
 description = "A library that takes the pain out of creating ChatGPT bots."
 authors = ["Stavros Korokithakis <hi@stavros.io>"]
+repository = "https://github.com/skorokithakis/ChatGPT-Bot"
+homepage = "https://github.com/skorokithakis/ChatGPT-Bot"
 license = "MIT"
 readme = "README.md"
 packages = [{include = "chatgpt_bot"}]
