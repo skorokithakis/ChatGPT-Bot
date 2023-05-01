@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "chatgpt-bot"
+version = "0.1.0"
+description = "A library that takes the pain out of creating ChatGPT bots."
+authors = ["Stavros Korokithakis <hi@stavros.io>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "chatgpt_bot"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+openai = "^0.27.5"
+
+[tool.ruff]
+ignore = ["E501", "D101", "D104"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
