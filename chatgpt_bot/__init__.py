@@ -55,7 +55,7 @@ class Conversation:
             """
         CREATE TABLE IF NOT EXISTS "Metadata" (
           "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-          "conversation_id" TEXT NOT NULL,
+          "conversation_id" TEXT NOT NULL UNIQUE,
           "metadata" BLOB NOT NULL
         )
         """
@@ -128,7 +128,12 @@ class Conversation:
     def set_metadata(self, metadata):
         """Store some metadata for the current conversation."""
         self._cur.execute(
-            """INSERT INTO "Metadata" (conversation_id, metadata) VALUES (?, ?);""",
+            """
+            INSERT INTO Metadata (conversation_id, metadata)
+            VALUES (?, ?)
+            ON CONFLICT(conversation_id) DO UPDATE SET
+                metadata = excluded.metadata;
+            """,
             (self._conversation_id, json.dumps(metadata)),
         )
         self._con.commit()
