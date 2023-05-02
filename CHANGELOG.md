@@ -12,6 +12,7 @@ Fix
 
 Other
 ~~~~~
+- Doc: Minor doc correction. [Stavros Korokithakis]
 - Build: Release v0.1.2. [Stavros Korokithakis]
 - Feat: Add metadata storing and retrieval. [Stavros Korokithakis]
 - Build: Release v0.1.1. [Stavros Korokithakis]
