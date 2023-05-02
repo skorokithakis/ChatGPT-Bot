@@ -1,4 +1,5 @@
 """A small library that helps you to create ChatGPT bots."""
+import json
 import sqlite3
 from typing import Any
 from typing import Dict
@@ -52,7 +53,22 @@ class Conversation:
 
         self._cur.execute(
             """
+        CREATE TABLE IF NOT EXISTS "Metadata" (
+          "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+          "conversation_id" TEXT NOT NULL,
+          "metadata" BLOB NOT NULL
+        )
+        """
+        )
+
+        self._cur.execute(
+            """
         CREATE INDEX IF NOT EXISTS "idx_message__conversation_id" ON "Message" ("conversation_id");
+        """
+        )
+        self._cur.execute(
+            """
+        CREATE INDEX IF NOT EXISTS "idx_metadata__conversation_id" ON "Metadata" ("conversation_id");
         """
         )
         self._con.commit()
@@ -97,6 +113,25 @@ class Conversation:
             for x in reversed(self._cur.fetchall())
         ]
         return messages
+
+    def get_metadata(self) -> Any:
+        """Retrieve the metadata for the current conversation."""
+        self._cur.execute(
+            """SELECT id, metadata FROM "Metadata" WHERE conversation_id=?""",
+            (self._conversation_id,),
+        )
+        metadata = self._cur.fetchone()
+        if not metadata:
+            return None
+        return json.loads(metadata[1])
+
+    def set_metadata(self, metadata):
+        """Store some metadata for the current conversation."""
+        self._cur.execute(
+            """INSERT INTO "Metadata" (conversation_id, metadata) VALUES (?, ?);""",
+            (self._conversation_id, json.dumps(metadata)),
+        )
+        self._con.commit()
 
     def ask(self, message: str) -> str:
         """Ask ChatGPT a question."""
