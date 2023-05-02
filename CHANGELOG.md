@@ -7,6 +7,7 @@ Changelog
 
 Fix
 ~~~
+- Fix metadata being unupdatable. [Stavros Korokithakis]
 - Require older Python version. [Stavros Korokithakis]
 
 Other
