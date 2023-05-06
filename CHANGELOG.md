@@ -12,6 +12,7 @@ Fix
 
 Other
 ~~~~~
+- Feat: Add time_limit. [Stavros Korokithakis]
 - Build: Release v0.1.3. [Stavros Korokithakis]
 - Doc: Minor doc correction. [Stavros Korokithakis]
 - Build: Release v0.1.2. [Stavros Korokithakis]
