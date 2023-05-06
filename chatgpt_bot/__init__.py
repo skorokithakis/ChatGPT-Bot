@@ -20,6 +20,7 @@ class Conversation:
         database_filename: str = "database.sqlite3",
         model: str = "gpt-3.5-turbo",
         message_limit: Optional[int] = None,
+        time_limit: Optional[int] = None,
     ):
         """
         Initialize the class.
@@ -30,11 +31,13 @@ class Conversation:
         database_filename - Where you want to save the database."
         model - The ChatGPT model version to use.
         message_limit - The number of messages to retrieve from history every time.
+        time_limit - Only send GPT previous messages exchanged within `time_limit` hours.
         """
         openai.api_key = api_key
         self._conversation_id = conversation_id
         self._system_prompt = system_prompt
         self._message_limit = message_limit
+        self._time_limit = time_limit
         self._model = model
         self._con = sqlite3.connect(database_filename)
         self._cur = self._con.cursor()
@@ -88,26 +91,24 @@ class Conversation:
 
     def _get_messages(self) -> List[Dict[str, Any]]:
         """Retrieve all messages from the database."""
-        if self._message_limit:
-            self._cur.execute(
-                """
+        query = [
+            """
             SELECT id, timestamp, role, message FROM "Message" WHERE
             conversation_id=?
-            ORDER BY timestamp DESC
-            LIMIT ?;
-            """,
-                (self._conversation_id, self._message_limit),
-            )
-        else:
-            self._cur.execute(
-                """
-            SELECT id, timestamp, role, message FROM "Message" WHERE
-            conversation_id=?
-            ORDER BY timestamp DESC
-            """,
-                (self._conversation_id,),
+            """
+        ]
+
+        if self._time_limit:
+            query.append(
+                f"AND timestamp >= datetime('now', '-{self._time_limit} hours')"
             )
 
+        query.append("ORDER BY timestamp DESC")
+
+        if self._message_limit:
+            query.append(f"LIMIT {self._message_limit}")
+
+        self._cur.execute(" ".join(query), (self._conversation_id,))
         messages = [
             {"id": x[0], "timestamp": x[1], "role": x[2], "message": x[3]}
             for x in reversed(self._cur.fetchall())
