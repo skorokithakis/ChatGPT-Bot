@@ -7,6 +7,7 @@ Changelog
 
 Fix
 ~~~
+- Use the proper OpenAI library version. [Stavros Korokithakis]
 - Fix metadata being unupdatable. [Stavros Korokithakis]
 - Require older Python version. [Stavros Korokithakis]
 
