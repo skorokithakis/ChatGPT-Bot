@@ -6,7 +6,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-import openai
+from openai import OpenAI
 
 
 class Conversation:
@@ -33,7 +33,7 @@ class Conversation:
         message_limit - The number of messages to retrieve from history every time.
         time_limit - Only send GPT previous messages exchanged within `time_limit` hours.
         """
-        openai.api_key = api_key
+        self._openai = OpenAI(api_key=api_key)
         self._conversation_id = conversation_id
         self._system_prompt = system_prompt
         self._message_limit = message_limit
@@ -139,16 +139,36 @@ class Conversation:
         )
         self._con.commit()
 
-    def ask(self, message: str) -> str:
+    def ask(self, message: str, functions=None) -> dict[str, Any]:
         """Ask ChatGPT a question."""
         chat = [{"role": "system", "content": self._system_prompt}]
         self._add_message(message, user=True)
         chat.extend(
             [{"role": m["role"], "content": m["message"]} for m in self._get_messages()]
         )
-        completion = openai.ChatCompletion.create(
-            model=self._model, messages=chat, temperature=0.3
-        )
-        reply = completion["choices"][0]["message"]["content"].strip()
-        self._add_message(reply, user=False)
-        return reply
+
+        if functions:
+            completion = self._openai.chat.completions.create(
+                model=self._model, messages=chat, tools=functions
+            )
+        else:
+            completion = self._openai.chat.completions.create(
+                model=self._model, messages=chat
+            )
+
+        finish_reason = completion.choices[0].finish_reason
+        if finish_reason == "tool_calls":
+            response_message = completion.choices[0].message
+            function_calls = []
+            for tool_call in response_message.tool_calls:
+                if tool_call.type != "function":
+                    continue
+                function_calls.append(
+                    (tool_call.function.name, json.loads(tool_call.function.arguments))
+                )
+            self._add_message("Ok, done.", user=False)
+            return {"type": "function", "data": function_calls}
+        else:
+            reply = completion.choices[0].message.content.strip()
+            self._add_message(reply, user=False)
+            return {"type": "text", "data": reply}
