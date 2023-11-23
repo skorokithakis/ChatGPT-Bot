@@ -12,6 +12,7 @@ Fix
 
 Other
 ~~~~~
+- Build: Release v0.2.0. [Stavros Korokithakis]
 - Feat: Add function calling. [Stavros Korokithakis]
 - Build: Release v0.1.4. [Stavros Korokithakis]
 - Feat: Add time_limit. [Stavros Korokithakis]
